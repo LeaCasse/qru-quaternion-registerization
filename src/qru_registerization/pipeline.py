@@ -5,7 +5,6 @@ import numpy as np
 from .gates import qru_unitary, qru_state
 from .quaternion_geometry import su2_to_quaternion, bloch_from_quaternion
 from .bloch import bloch_vector, signed_coordinate
-from .axis_selection import variance_axis, tangent_axis
 from .amplitude_interface import projector_probability, probability_from_signed_coordinate, signed_coordinate_from_probability
 from .fixed_point import quantize_signed_magnitude
 

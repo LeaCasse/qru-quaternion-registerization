@@ -1,9 +1,0 @@
-{'depth': 4, 'n_points': 201, 'max_bloch_consistency_error': 7.468261590855957e-16, 'mean_bloch_consistency_error': 2.2479576990622603e-16}
-[run] exp01_quaternion_bloch_consistency.py
-[run] exp02_meridian_orientation_loss.py
-[run] exp03_qru_quaternion_path.py
-[run] exp04_axis_selection.py
-[run] exp05_register_precision.py
-[run] exp06_readout_comparison.py
-[run] exp07_downstream_threshold.py
-All experiments completed.
