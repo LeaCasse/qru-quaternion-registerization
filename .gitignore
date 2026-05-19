@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+outputs/figures/*.pdf
+outputs/tables/*.csv
+outputs/tables/*.json
+outputs/data/*.npy
