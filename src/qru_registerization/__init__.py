@@ -1,3 +1,1 @@
-"""Operational code for quaternion-diagnostic signed QRU registerization."""
-
-__all__ = []
+"""Geometry-aware coherent registerization for single-qubit QRUs."""

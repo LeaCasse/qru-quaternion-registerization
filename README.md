@@ -1,27 +1,17 @@
-# QRU quaternion-diagnostic signed registerization
+# QRU geometry-aware coherent registerization
 
-Operational code for the paper:
+Code accompanying the paper **Geometry-Aware Coherent Registerization of Single-Qubit Data Re-Uploading Models**.
 
-**Quaternion-Diagnostic Signed Registerization of Single-Qubit Data Re-Uploading Models**
+The repository implements two components:
 
-Core pipeline:
-
-```text
-QRU U_theta(x)
-  -> quaternion path q_theta(x) in S^3
-  -> hidden-motion diagnostics delta_q
-  -> quaternion-guided readout axis v_quat
-  -> signed coordinate s_v(x)
-  -> QAE-compatible probability p_v(x)=(1+s_v(x))/2
-  -> signed fixed-point register estimate
-  -> downstream QAOA toy layer
-```
+1. gauge-aware selection of a signed QRU readout;
+2. coherent conversion of that readout into a finite register controlling a downstream quantum operation.
 
 ## Install
 
 ```bash
-pip install -e .
-pip install -r requirements.txt
+python -m pip install -e .
+python -m pip install -r requirements.txt
 ```
 
 ## Validate
@@ -30,35 +20,30 @@ pip install -r requirements.txt
 python -m pytest -q
 ```
 
-## Reproduce experiments
+## Reproduce all experiments
 
 ```bash
 python experiments/run_all.py
 ```
 
-Generated files are written to:
+The aggregate runner may take several minutes because it launches Qiskit statevector and transpilation checks. To recompute the full expensive resource sweep instead of using the validated reference counts, run:
 
-```text
-outputs/figures/
-outputs/tables/
-outputs/data/
+```bash
+python experiments/03_coherent_registerization.py --full-resources
 ```
 
-## Repository structure
+Generated results are written to `outputs/figures/` and `outputs/tables/`.
+
+## Experiments
 
 ```text
-src/qru_registerization/     # reusable research code
-experiments/                 # paper-aligned experiments
-notebooks/                   # executable pedagogical walkthrough
-outputs/                     # generated artifacts
+01_gauge_validation.py          gauge-only motion and quotient correction
+02_readout_selection.py         controlled projection blindness and axis selection
+03_coherent_registerization.py  QAE, reversible signed decoding, error and robustness
+04_coherent_composition.py      register-controlled evolution and coherence test
+05_readout_generalization.py    train/test multi-seed readout comparison
 ```
 
-## Main scripts
+## Paper figures
 
-```text
-01_hidden_motion_diagnostics.py   # q-motion vs visible readout motion
-02_readout_axis_comparison.py     # e_x,e_y,e_z vs v_quat
-03_registerization_precision.py   # signed fixed-point error
-04_qru_qaoa_case_study.py         # QRU -> QAOA downstream comparison
-05_multiseed_statistics.py        # robustness over seeds/depths
-```
+The four PDFs in `figures/` are the curated figures referenced by `main.tex`. They are regenerated from the experiment outputs; no notebook is required.

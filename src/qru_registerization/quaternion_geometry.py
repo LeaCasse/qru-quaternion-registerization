@@ -54,8 +54,12 @@ def bloch_from_quaternion(q: np.ndarray) -> np.ndarray:
     return quaternion_to_rotation_matrix(q) @ ez
 
 
-def geodesic_distance_s3(q1: np.ndarray, q2: np.ndarray) -> float:
-    """Projective S^3 distance; q and -q are identified."""
+def relative_rotation_angle(q1: np.ndarray, q2: np.ndarray) -> float:
+    """Relative SO(3) rotation angle in [0, pi].
+
+    Unit quaternions q and -q are identified. The factor two converts
+    projective S^3 separation into the corresponding SO(3) rotation angle.
+    """
     q1 = normalize_quaternion(q1)
     q2 = normalize_quaternion(q2)
     dot = abs(float(np.dot(q1, q2)))
@@ -65,4 +69,45 @@ def geodesic_distance_s3(q1: np.ndarray, q2: np.ndarray) -> float:
 
 def quaternion_path_distances(qs: np.ndarray) -> np.ndarray:
     qs = np.asarray(qs, dtype=float)
-    return np.array([geodesic_distance_s3(qs[i], qs[i + 1]) for i in range(len(qs) - 1)])
+    return np.array([relative_rotation_angle(qs[i], qs[i + 1]) for i in range(len(qs) - 1)])
+
+
+def fubini_study_distance(psi_a: np.ndarray, psi_b: np.ndarray) -> float:
+    """Pure-state distance 2 arccos(|<psi_a|psi_b>|) in [0, pi]."""
+    a = np.asarray(psi_a, dtype=complex).reshape(-1)
+    b = np.asarray(psi_b, dtype=complex).reshape(-1)
+    na = np.linalg.norm(a)
+    nb = np.linalg.norm(b)
+    if na == 0 or nb == 0:
+        raise ValueError("state vectors must be non-zero")
+    overlap = float(abs(np.vdot(a / na, b / nb)))
+    overlap = float(np.clip(overlap, 0.0, 1.0))
+    if 1.0 - overlap < 1e-14:
+        return 0.0
+    return float(2.0 * np.arccos(overlap))
+
+
+def bloch_geodesic_distance(r_a: np.ndarray, r_b: np.ndarray) -> float:
+    """Geodesic angle between unit Bloch vectors in [0, pi]."""
+    a = np.asarray(r_a, dtype=float).reshape(3)
+    b = np.asarray(r_b, dtype=float).reshape(3)
+    na = np.linalg.norm(a)
+    nb = np.linalg.norm(b)
+    if na == 0 or nb == 0:
+        raise ValueError("Bloch vectors must be non-zero")
+    dot = float(np.clip(np.dot(a / na, b / nb), -1.0, 1.0))
+    if 1.0 - dot < 1e-14:
+        return 0.0
+    return float(np.arccos(dot))
+
+
+def quotient_quaternion_distance(U_a: np.ndarray, U_b: np.ndarray) -> float:
+    """Distance on SU(2)/U(1) for states prepared from |0>.
+
+    This equals min_phi d_rot(U_a, U_b Rz(phi)) and is evaluated through
+    the equivalent Fubini--Study distance between U_a|0> and U_b|0>.
+    """
+    Ua = np.asarray(U_a, dtype=complex).reshape(2, 2)
+    Ub = np.asarray(U_b, dtype=complex).reshape(2, 2)
+    ket0 = np.array([1.0, 0.0], dtype=complex)
+    return fubini_study_distance(Ua @ ket0, Ub @ ket0)

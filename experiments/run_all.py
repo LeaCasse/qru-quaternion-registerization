@@ -1,18 +1,24 @@
 from __future__ import annotations
 
-import runpy
+import os
+import shlex
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
 SCRIPTS = [
-    "01_hidden_motion_diagnostics.py",
-    "02_readout_axis_comparison.py",
-    "03_registerization_precision.py",
-    "04_qru_qaoa_case_study.py",
-    "05_multiseed_statistics.py",
+    "01_gauge_validation.py",
+    "02_readout_selection.py",
+    "05_readout_generalization.py",
+    "03_coherent_registerization.py",
+    "04_coherent_composition.py",
 ]
 
 for script in SCRIPTS:
-    print(f"Running {script}...")
-    runpy.run_path(str(ROOT / script), run_name="__main__")
+    print(f"Running {script}...", flush=True)
+    command = f"{shlex.quote(sys.executable)} {shlex.quote(str(ROOT / script))}"
+    status = os.system(command)
+    if status != 0:
+        raise SystemExit(f"{script} failed with status {status}")
+
 print("All experiments completed.")

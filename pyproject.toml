@@ -5,9 +5,9 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "qru-quaternion-registerization"
 version = "0.1.0"
-description = "Quaternion-guided signed registerization tools for single-qubit QRUs"
+description = "Geometry-aware coherent registerization tools for single-qubit QRUs"
 requires-python = ">=3.10"
-dependencies = ["numpy>=1.24", "matplotlib>=3.7"]
+dependencies = ["numpy>=1.24", "matplotlib>=3.7", "qiskit>=1.2,<2.0"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
