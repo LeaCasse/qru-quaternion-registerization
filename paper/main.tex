@@ -260,7 +260,7 @@ Because all $Z$ terms commute, each magnitude bit controls one weighted rotation
 
 All signed words for $m_s=2,3$ reproduce the direct rotation with state infidelity below $4\times10^{-15}$. A seven-qubit two-input construction maintains a superposition of QRU branches, writes two signed values coherently, applies the downstream evolution, and reverses the pipeline. Its interference echo gives $P(0)=1$ to numerical precision, while interface dephasing gives $P(0)=1/2$.
 
-The complete QAE--decoder--downstream circuit is validated against a direct phase-word-controlled reference. For $(m_\phi,m_s)=(4,3)$, it uses ten qubits and attains fidelity above $1-1.4\times10^{-13}$ with signed-register reset probability above $1-1.3\times10^{-13}$. The resources in Table~\ref{tab:resources} are regenerated from the circuit. The finite lookup, together with its uncomputation, is the dominant cost.
+The complete QAE--decoder--downstream circuit is implemented and transpiled with Qiskit~\cite{Qiskit2024}, then validated against a direct phase-word-controlled reference. For $(m_\phi,m_s)=(4,3)$, it uses ten qubits and attains fidelity above $1-1.4\times10^{-13}$ with signed-register reset probability above $1-1.3\times10^{-13}$. The resources in Table~\ref{tab:resources} are regenerated from the circuit. The finite lookup, together with its uncomputation, is the dominant cost.
 
 \begin{table*}[t]
 \centering
@@ -369,38 +369,7 @@ Q_{\axis}=-A_{\axis}S_0A_{\axis}^{\dagger}S_{\mathrm{good}},
 \end{equation}
 where $S_0=\Id-2\ket{0}\!\bra{0}$ and $S_{\mathrm{good}}=\Id-2\ket{1}\!\bra{1}$. QPE applied to $Q_{\axis}$ yields the symmetric phases associated with $p_{\axis}=\sin^2\theta$. The finite decoder is a reversible lookup over the $2^{m_\phi}$ phase words. It is exact for the selected discretization but has exponential synthesis cost. After the controlled downstream operation, applying the decoder again returns all signed ancillas to $\ket{0}$.
 
-\begin{thebibliography}{10}
-
-\bibitem{PerezSalinas2020}
-A.~P\'erez-Salinas, A.~Cervera-Lierta, E.~Gil-Fuster, and J.~I.~Latorre,
-``Data re-uploading for a universal quantum classifier,''
-\emph{Quantum} \textbf{4}, 226 (2020).
-
-\bibitem{Schuld2021}
-M.~Schuld, R.~Sweke, and J.~J.~Meyer,
-``Effect of data encoding on the expressive power of variational quantum-machine-learning models,''
-\emph{Phys. Rev. A} \textbf{103}, 032430 (2021).
-
-\bibitem{Barthe2024}
-A.~Barthe and A.~P\'erez-Salinas,
-``Gradients and frequency profiles of quantum re-uploading models,''
-\emph{Quantum} \textbf{8}, 1523 (2024).
-
-\bibitem{Brassard2002}
-G.~Brassard, P.~H\o yer, M.~Mosca, and A.~Tapp,
-``Quantum amplitude amplification and estimation,'' in
-\emph{Quantum Computation and Information}, AMS Contemporary Mathematics 305, 53--74 (2002).
-
-\bibitem{Rall2021}
-P.~Rall,
-``Faster coherent quantum algorithms for phase, energy, and amplitude estimation,''
-\emph{Quantum} \textbf{5}, 566 (2021).
-
-\bibitem{RallFuller2023}
-P.~Rall and B.~Fuller,
-``Amplitude estimation from quantum signal processing,''
-\emph{Quantum} \textbf{7}, 937 (2023).
-
-\end{thebibliography}
+\bibliographystyle{unsrt}
+\bibliography{references}
 
 \end{document}

@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2025/dev/Debian) (preloaded format=pdflatex 2026.2.6)  23 JUN 2026 10:39
+This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2025/dev/Debian) (preloaded format=pdflatex 2026.2.6)  23 JUN 2026 10:42
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1061,6 +1061,19 @@ t line 209.
 (pdftex.def)             Requested size: 474.02086pt x 360.3137pt.
 [3 <./figures/gauge_only_motion.png (PNG copy)> <./figures/projection_blindness
 .png (PNG copy)>]
+
+LaTeX Warning: Citation `Qiskit2024' on page 4 undefined on input line 263.
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 263--264
+[]\T1/cmr/m/n/10.95 The com-plete QAE--decoder--downstream
+ []
+
+
+Underfull \hbox (badness 3396) in paragraph at lines 263--264
+\T1/cmr/m/n/10.95 cir-cuit is im-ple-mented and tran-spiled with
+ []
+
 <figures/readout_generalization.png, id=164, 722.7pt x 289.08pt>
 File: figures/readout_generalization.png Graphic file (type png)
 <use figures/readout_generalization.png>
@@ -1073,7 +1086,7 @@ File: figures/coherent_precision_robustness.png Graphic file (type png)
 Package pdftex.def Info: figures/coherent_precision_robustness.png  used on inp
 ut line 289.
 (pdftex.def)             Requested size: 111.28625pt x 81.47337pt.
- [4 <./figures/06_bloch_register_diagnostic.png (PNG copy)>]
+[4 <./figures/06_bloch_register_diagnostic.png (PNG copy)>]
 Underfull \hbox (badness 1867) in paragraph at lines 300--301
 []\T1/cmr/m/n/10.95 The co-her-ent cir-cuit es-tab-lishes func-tional
  []
@@ -1104,59 +1117,82 @@ Underfull \hbox (badness 1325) in paragraph at lines 307--308
 
 [5 <./figures/readout_generalization.png (PNG copy)> <./figures/coherent_precis
 ion_robustness.png (PNG copy)>]
-
-Class quantumarticle Warning: The quantumarticle class recommends generating th
-e bibliography from a BibTeX file containing DOIs with natbib in order to ensur
-e the generation of DOI hyperlinks on input line 372.
-
-
-Underfull \hbox (badness 1122) in paragraph at lines 390--393
-[]\T1/cmr/m/n/10.95 G. Bras-sard, P. Høyer, M. Mosca, and
- []
-
-
-Underfull \hbox (badness 1038) in paragraph at lines 395--398
-[]\T1/cmr/m/n/10.95 P. Rall, ``Faster co-her-ent quan-tum al-go-
- []
-
+No file main.bbl.
 [6] (./main.aux)
  ***********
 LaTeX2e <2024-11-01> patch level 2
 L3 programming layer <2025-01-18>
  ***********
-Package rerunfilecheck Info: File `main.out' has not changed.
-(rerunfilecheck)             Checksum: 7D61615EAFD10999B39386886A8694AC;2886.
+
+
+LaTeX Warning: There were undefined references.
+
+
+Package rerunfilecheck Warning: File `main.out' has changed.
+(rerunfilecheck)                Rerun to get outlines right
+(rerunfilecheck)                or use package `bookmark'.
+
+Package rerunfilecheck Info: Checksums for `main.out':
+(rerunfilecheck)             Before: 7D61615EAFD10999B39386886A8694AC;2886
+(rerunfilecheck)             After:  0E03A21F6C2F6F53168FF252D24A8489;2790.
  ) 
 Here is how much of TeX's memory you used:
- 26610 strings out of 473197
- 487079 string characters out of 5718606
+ 26607 strings out of 473197
+ 486999 string characters out of 5718606
  914512 words of memory out of 5000000
- 49331 multiletter control sequences out of 15000+600000
- 649059 words of font info for 106 fonts, out of 8000000 for 9000
+ 49329 multiletter control sequences out of 15000+600000
+ 648275 words of font info for 105 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  88i,12n,117p,1183b,619s stack positions out of 10000i,1000n,20000p,200000b,200000s
-</usr/share/texmf/fonts/type1/public/lm/lmbx10.pfb></usr/share/texmf/fonts/ty
-pe1/public/lm/lmex10.pfb></usr/share/texmf/fonts/type1/public/lm/lmmi10.pfb></u
-sr/share/texmf/fonts/type1/public/lm/lmmi6.pfb></usr/share/texmf/fonts/type1/pu
-blic/lm/lmmi7.pfb></usr/share/texmf/fonts/type1/public/lm/lmmi8.pfb></usr/share
-/texmf/fonts/type1/public/lm/lmmib10.pfb></usr/share/texmf/fonts/type1/public/l
-m/lmr10.pfb></usr/share/texmf/fonts/type1/public/lm/lmr7.pfb></usr/share/texmf/
-fonts/type1/public/lm/lmr8.pfb></usr/share/texmf/fonts/type1/public/lm/lmri10.p
-fb></usr/share/texmf/fonts/type1/public/lm/lmss10.pfb></usr/share/texmf/fonts/t
-ype1/public/lm/lmss12.pfb></usr/share/texmf/fonts/type1/public/lm/lmss17.pfb></
-usr/share/texmf/fonts/type1/public/lm/lmss8.pfb></usr/share/texmf/fonts/type1/p
-ublic/lm/lmss9.pfb></usr/share/texmf/fonts/type1/public/lm/lmsy10.pfb></usr/sha
-re/texmf/fonts/type1/public/lm/lmsy7.pfb></usr/share/texmf/fonts/type1/public/l
-m/lmsy8.pfb></usr/share/texmf/fonts/type1/public/lm/lmtt10.pfb></usr/share/texl
-ive/texmf-dist/fonts/type1/public/amsfonts/symbols/msam10.pfb></usr/share/texli
-ve/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb></usr/share/texmf/
-fonts/type1/public/cm-super/sfrb1095.pfb></usr/share/texmf/fonts/type1/public/c
-m-super/sfrm1095.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfti1095.pfb
->
-Output written on main.pdf (6 pages, 3836339 bytes).
+
+pdfTeX warning (dest): name{cite.RallFuller2023} has been referenced but does n
+ot exist, replaced by a fixed one
+
+
+pdfTeX warning (dest): name{cite.Rall2021} has been referenced but does not exi
+st, replaced by a fixed one
+
+
+pdfTeX warning (dest): name{cite.Brassard2002} has been referenced but does not
+ exist, replaced by a fixed one
+
+
+pdfTeX warning (dest): name{cite.Barthe2024} has been referenced but does not e
+xist, replaced by a fixed one
+
+
+pdfTeX warning (dest): name{cite.Schuld2021} has been referenced but does not e
+xist, replaced by a fixed one
+
+
+pdfTeX warning (dest): name{cite.PerezSalinas2020} has been referenced but does
+ not exist, replaced by a fixed one
+
+
+pdfTeX warning (dest): name{section*.21} has been referenced but does not exist
+, replaced by a fixed one
+
+</usr/share/texmf/fonts/type1/public/lm/lmbx10.pfb></usr/share/texmf/fonts/type
+1/public/lm/lmex10.pfb></usr/share/texmf/fonts/type1/public/lm/lmmi10.pfb></usr
+/share/texmf/fonts/type1/public/lm/lmmi6.pfb></usr/share/texmf/fonts/type1/publ
+ic/lm/lmmi7.pfb></usr/share/texmf/fonts/type1/public/lm/lmmi8.pfb></usr/share/t
+exmf/fonts/type1/public/lm/lmmib10.pfb></usr/share/texmf/fonts/type1/public/lm/
+lmr10.pfb></usr/share/texmf/fonts/type1/public/lm/lmr7.pfb></usr/share/texmf/fo
+nts/type1/public/lm/lmr8.pfb></usr/share/texmf/fonts/type1/public/lm/lmri10.pfb
+></usr/share/texmf/fonts/type1/public/lm/lmss10.pfb></usr/share/texmf/fonts/typ
+e1/public/lm/lmss12.pfb></usr/share/texmf/fonts/type1/public/lm/lmss17.pfb></us
+r/share/texmf/fonts/type1/public/lm/lmss8.pfb></usr/share/texmf/fonts/type1/pub
+lic/lm/lmss9.pfb></usr/share/texmf/fonts/type1/public/lm/lmsy10.pfb></usr/share
+/texmf/fonts/type1/public/lm/lmsy7.pfb></usr/share/texmf/fonts/type1/public/lm/
+lmsy8.pfb></usr/share/texmf/fonts/type1/public/lm/lmtt10.pfb></usr/share/texliv
+e/texmf-dist/fonts/type1/public/amsfonts/symbols/msam10.pfb></usr/share/texlive
+/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb></usr/share/texmf/fo
+nts/type1/public/cm-super/sfrm1095.pfb></usr/share/texmf/fonts/type1/public/cm-
+super/sfti1095.pfb>
+Output written on main.pdf (6 pages, 3808252 bytes).
 PDF statistics:
- 330 PDF objects out of 1000 (max. 8388607)
- 262 compressed objects within 3 object streams
+ 325 PDF objects out of 1000 (max. 8388607)
+ 259 compressed objects within 3 object streams
  70 named destinations out of 1000 (max. 500000)
  171 words of extra memory for PDF output out of 10000 (max. 10000000)
 
