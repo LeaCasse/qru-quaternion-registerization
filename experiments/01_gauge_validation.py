@@ -1,6 +1,9 @@
 from __future__ import annotations
 
 import csv
+
+import matplotlib
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -50,13 +53,18 @@ def main(n_x: int = 161) -> None:
     assert float(np.max(bloch_distance)) < 1e-7
     assert float(np.sum(raw)) > 6.0
 
+    raw_cumulative = np.concatenate([[0.0], np.cumsum(raw)])
     rows = [
         {
             "x_mid": float(x_mid[i]),
-            "raw_rotation_angle": float(raw[i]),
+            "raw_consecutive_step_distance": float(raw[i]),
             "quotient_distance": float(quotient[i]),
             "fubini_study_distance": float(fubini_study[i]),
-            "bloch_distance": float(bloch_distance[i]),
+            "bloch_geodesic_distance": float(bloch_distance[i]),
+            "raw_cumulative_length_left": float(raw_cumulative[i]),
+            "r_x_left": float(bloch[i, 0]),
+            "r_y_left": float(bloch[i, 1]),
+            "r_z_left": float(bloch[i, 2]),
         }
         for i in range(n_x - 1)
     ]
@@ -70,25 +78,39 @@ def main(n_x: int = 161) -> None:
         "max_quotient_distance": float(np.max(quotient)),
         "max_fubini_study_distance": float(np.max(fubini_study)),
         "max_bloch_distance": float(np.max(bloch_distance)),
+        "max_r_x_range": float(np.ptp(bloch[:, 0])),
+        "max_r_y_range": float(np.ptp(bloch[:, 1])),
+        "max_r_z_range": float(np.ptp(bloch[:, 2])),
     }]
     with (TAB / "01_gauge_only_summary.csv").open("w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=list(summary[0].keys()))
         writer.writeheader()
         writer.writerows(summary)
 
-    fig, ax = plt.subplots(figsize=(8, 4.2))
-    ax.plot(x_mid, raw, label=r"raw relative rotation $\delta_{\mathrm{rot}}$")
-    ax.plot(x_mid, quotient, label=r"quotient distance $\delta_{\mathrm{quot}}$")
-    ax.plot(x_mid, fubini_study, linestyle="--", label=r"Fubini--Study $\delta_{\mathrm{FS}}$")
-    ax.plot(x_mid, bloch_distance, linestyle=":", label=r"Bloch geodesic $\delta_{\mathrm{Bloch}}$")
-    ax.set_xlabel("x")
-    ax.set_ylabel("consecutive-point distance")
-    ax.legend(fontsize=8)
-    fig.tight_layout()
+    fig, axes = plt.subplots(1, 2, figsize=(9.2, 3.8))
+    axes[0].plot(x_mid, raw, label=r"raw $\delta_{\mathrm{rot}}$")
+    axes[0].plot(x_mid, quotient, label=r"quotient $\delta_{\mathrm{quot}}$")
+    axes[0].plot(x_mid, bloch_distance, linestyle=":", label="Bloch geodesic")
+    axes[0].set_xlabel("x")
+    axes[0].set_ylabel("consecutive-step distance")
+    axes[0].legend(fontsize=8)
+
+    axes[1].plot(xs, raw_cumulative, label=r"raw cumulative length")
+    axes[1].plot(xs, bloch[:, 0], linestyle="--", label=r"$r_x$")
+    axes[1].plot(xs, bloch[:, 1], linestyle="--", label=r"$r_y$")
+    axes[1].plot(xs, bloch[:, 2], linestyle="--", label=r"$r_z$")
+    axes[1].set_xlabel("x")
+    axes[1].set_ylabel("value")
+    axes[1].legend(fontsize=8)
+    fig.subplots_adjust(hspace=0.35, wspace=0.28)
     fig.savefig(FIG / "01_gauge_only_motion.pdf")
-    fig.savefig(FIG / "01_gauge_only_motion.png", dpi=180)
     plt.close(fig)
 
 
 if __name__ == "__main__":
     main()
+    import os
+    import sys
+    sys.stdout.flush()
+    sys.stderr.flush()
+    os._exit(0)

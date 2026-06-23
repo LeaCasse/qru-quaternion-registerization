@@ -1,11 +1,16 @@
 from __future__ import annotations
 
 import csv
+import gc
+
+import matplotlib
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 from qiskit import transpile
 
 from _common import FIG, TAB
+from qru_registerization.transpile_config import PAPER_TRANSPILE_KWARGS
 from qru_registerization.amplitude_interface import (
     basis_rotation_from_axis,
     basis_rotation_probability,
@@ -15,11 +20,14 @@ from qru_registerization.amplitude_interface import (
 from qru_registerization.bloch import Z
 from qru_registerization.coherent_register import (
     build_minimal_coherent_qae_circuit,
+    build_phase_to_signed_decoder_circuit,
+    build_qae_signed_downstream_circuit,
+    build_signed_downstream_block_circuit,
     directional_amplitude_unitary,
     qae_amplitude_summary,
+    qae_phase_distribution_from_probability,
     phase_index_to_signed_code,
     qae_signed_downstream_validation,
-    build_qae_signed_downstream_circuit,
     qae_signed_error_budget,
     qae_signed_error_budget_from_probability,
 )
@@ -27,6 +35,42 @@ from qru_registerization.fixed_point import max_quantization_error_bound
 from qru_registerization.gates import qru_unitary, random_qru_params
 from qru_registerization.pipeline import compute_paths, registerize_path
 from qru_registerization.quaternion_diagnostics import quotient_quaternion_weighted_axis
+
+
+def _count_resources(circuit):
+    compiled = transpile(circuit, **PAPER_TRANSPILE_KWARGS)
+    logical_ops = circuit.count_ops()
+    compiled_ops = compiled.count_ops()
+    return {
+        "num_qubits": circuit.num_qubits,
+        "logical_depth": circuit.depth(),
+        "compiled_depth": compiled.depth(),
+        "compiled_cx_count": int(compiled_ops.get("cx", 0)),
+        "logical_mcx_count": int(logical_ops.get("mcx", 0)),
+        "logical_mcrz_count": int(logical_ops.get("mcrz", 0)),
+    }
+
+
+def _write_latex_table(path, rows):
+    selected = [
+        r for r in rows
+        if r["block"] in {"qae_qpe", "phase_to_signed_lookup", "signed_downstream", "full_pipeline"}
+    ]
+    lines = [
+        r"\begin{tabular}{llrrrr}",
+        r"\toprule",
+        r"$(m_\phi,m_s)$ & block & qubits & logical depth & transpiled depth & CX \\",
+        r"\midrule",
+    ]
+    for r in selected:
+        label = f"({r['phase_bits']},{r['magnitude_bits']})"
+        block = str(r["block"]).replace("_", r"\_")
+        lines.append(
+            f"{label} & {block} & {r['num_qubits']} & {r['logical_depth']} & "
+            f"{r['compiled_depth']} & {r['compiled_cx_count']} \\\\" 
+        )
+    lines.extend([r"\bottomrule", r"\end{tabular}"])
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
 def main(seed: int = 13, depth: int = 5, n_x: int = 161, full_resources: bool = False) -> None:
@@ -97,9 +141,7 @@ def main(seed: int = 13, depth: int = 5, n_x: int = 161, full_resources: bool = 
         )
         qae_compiled = transpile(
             qae_circuit,
-            basis_gates=["rz", "sx", "x", "cx"],
-            optimization_level=0,
-            seed_transpiler=17,
+            **PAPER_TRANSPILE_KWARGS,
         )
         for phase_index, probability in qae_summary["distribution"].items():
             qae_rows.append({
@@ -158,9 +200,7 @@ def main(seed: int = 13, depth: int = 5, n_x: int = 161, full_resources: bool = 
     )
     integrated_compiled = transpile(
         integrated_circuit,
-        basis_gates=["rz", "sx", "x", "cx"],
-        optimization_level=0,
-        seed_transpiler=17,
+        **PAPER_TRANSPILE_KWARGS,
     )
     integrated_row = {
         "phase_bits": phase_bits,
@@ -177,67 +217,72 @@ def main(seed: int = 13, depth: int = 5, n_x: int = 161, full_resources: bool = 
         writer.writeheader()
         writer.writerow(integrated_row)
 
-    # Full transpilation of the finite lookup grows rapidly. The default run
-    # uses resource counts previously validated with optimization_level=0;
-    # pass --full-resources to recompute them.
-    reference_resources = {
-        (3, 2): {"num_qubits": 8, "logical_depth": 89, "compiled_depth": 795, "compiled_cx_count": 326},
-        (4, 3): {"num_qubits": 10, "logical_depth": 272, "compiled_depth": 6156, "compiled_cx_count": 2170},
-        (5, 4): {"num_qubits": 12, "logical_depth": 606, "compiled_depth": 19443, "compiled_cx_count": 6513},
-    }
+    # Precision/resource tradeoff.  The full-resource mode is used by run_all
+    # so paper outputs contain regenerated statevector validations, not placeholders.
     tradeoff_rows = []
-    for phase_bits_cfg, magnitude_bits_cfg in ((3, 2), (4, 3), (5, 4)):
+    breakdown_rows = []
+    precision_configs = ((3, 2), (4, 3), (5, 4))
+    for phase_bits_cfg, magnitude_bits_cfg in precision_configs:
         budget = qae_signed_error_budget_from_probability(
             float(abs(amplitude_unitary[1, 0]) ** 2),
             phase_bits_cfg,
             magnitude_bits_cfg,
             downstream_gamma,
         )
-        resources = dict(reference_resources[(phase_bits_cfg, magnitude_bits_cfg)])
-        validation = {
-            "state_fidelity": float("nan"),
-            "signed_zero_probability": float("nan"),
-            "signed_register_purity": float("nan"),
-        }
-        if full_resources:
-            cfg_circuit = build_qae_signed_downstream_circuit(
-                amplitude_unitary,
-                phase_bits=phase_bits_cfg,
-                magnitude_bits=magnitude_bits_cfg,
-                gamma=downstream_gamma,
-            )
-            cfg_compiled = transpile(
-                cfg_circuit,
-                basis_gates=["rz", "sx", "x", "cx"],
-                optimization_level=0,
-                seed_transpiler=17,
-            )
-            resources = {
-                "num_qubits": cfg_circuit.num_qubits,
-                "logical_depth": cfg_circuit.depth(),
-                "compiled_depth": cfg_compiled.depth(),
-                "compiled_cx_count": int(cfg_compiled.count_ops().get("cx", 0)),
-            }
-            validation = qae_signed_downstream_validation(
-                amplitude_unitary,
-                phase_bits=phase_bits_cfg,
-                magnitude_bits=magnitude_bits_cfg,
-                gamma=downstream_gamma,
-            )
-        elif (phase_bits_cfg, magnitude_bits_cfg) == (4, 3):
-            validation = integrated
+        full_circuit = build_qae_signed_downstream_circuit(
+            amplitude_unitary,
+            phase_bits=phase_bits_cfg,
+            magnitude_bits=magnitude_bits_cfg,
+            gamma=downstream_gamma,
+        )
+        full_resources = _count_resources(full_circuit)
+        validation = qae_signed_downstream_validation(
+            amplitude_unitary,
+            phase_bits=phase_bits_cfg,
+            magnitude_bits=magnitude_bits_cfg,
+            gamma=downstream_gamma,
+        )
         tradeoff_rows.append({
             "phase_bits": phase_bits_cfg,
             "magnitude_bits": magnitude_bits_cfg,
-            **resources,
+            **full_resources,
             **budget,
             **validation,
         })
+
+        block_circuits = {
+            "qae_qpe": build_minimal_coherent_qae_circuit(
+                amplitude_unitary, phase_bits=phase_bits_cfg
+            ),
+            "phase_to_signed_lookup": build_phase_to_signed_decoder_circuit(
+                phase_bits_cfg, magnitude_bits_cfg
+            ),
+            "signed_downstream": build_signed_downstream_block_circuit(
+                magnitude_bits_cfg, downstream_gamma
+            ),
+            "uncompute_signed_lookup": build_phase_to_signed_decoder_circuit(
+                phase_bits_cfg, magnitude_bits_cfg
+            ).inverse(),
+            "full_pipeline": full_circuit,
+        }
+        for block, circuit in block_circuits.items():
+            breakdown_rows.append({
+                "phase_bits": phase_bits_cfg,
+                "magnitude_bits": magnitude_bits_cfg,
+                "block": block,
+                **_count_resources(circuit),
+            })
+
     with (TAB / "03_precision_resource_tradeoff.csv").open("w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=list(tradeoff_rows[0].keys()))
         writer.writeheader()
         writer.writerows(tradeoff_rows)
 
+    with (TAB / "coherent_resource_breakdown.csv").open("w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=list(breakdown_rows[0].keys()))
+        writer.writeheader()
+        writer.writerows(breakdown_rows)
+    _write_latex_table(TAB / "coherent_resource_breakdown.tex", breakdown_rows)
 
     robustness_configs = ((3, 2), (4, 3), (5, 4))
     probability_grid = np.linspace(0.0, 1.0, 201)
@@ -310,7 +355,7 @@ def main(seed: int = 13, depth: int = 5, n_x: int = 161, full_resources: bool = 
                 and r["magnitude_bits"] == magnitude_bits_cfg
             ]
             total_errors = np.array([r["expected_total_signed_abs_error"] for r in selected])
-            downstream_errors = np.array([r["expected_downstream_state_infidelity"] for r in selected])
+            downstream_errors = np.array([max(r["expected_downstream_state_infidelity"], np.finfo(float).eps) for r in selected])
             summary_rows.append({
                 "source": source,
                 "phase_bits": phase_bits_cfg,
@@ -331,171 +376,70 @@ def main(seed: int = 13, depth: int = 5, n_x: int = 161, full_resources: bool = 
         writer.writeheader()
         writer.writerows(summary_rows)
 
-    fig2, axes2 = plt.subplots(2, 2, figsize=(11.2, 8.2))
-    for phase_bits_cfg, magnitude_bits_cfg in robustness_configs:
-        selected = [
-            r for r in robustness_rows
-            if r["source"] == "analytic_grid"
-            and r["phase_bits"] == phase_bits_cfg
-            and r["magnitude_bits"] == magnitude_bits_cfg
-        ]
-        label = rf"$({phase_bits_cfg},{magnitude_bits_cfg})$"
-        axes2[0, 0].plot(
-            [r["exact_probability"] for r in selected],
-            [r["expected_total_signed_abs_error"] for r in selected],
-            label=label,
-        )
-        axes2[0, 1].plot(
-            [r["exact_probability"] for r in selected],
-            [r["expected_downstream_state_infidelity"] for r in selected],
-            label=label,
-        )
-    axes2[0, 0].set_xlabel("exact probability $p$")
-    axes2[0, 0].set_ylabel("expected signed absolute error")
-    axes2[0, 0].set_title("Error across the full probability interval")
-    axes2[0, 0].legend(fontsize=8)
-    axes2[0, 1].set_xlabel("exact probability $p$")
-    axes2[0, 1].set_ylabel("expected downstream infidelity")
-    axes2[0, 1].set_yscale("log")
-    axes2[0, 1].set_title("Downstream impact across $p$")
-    axes2[0, 1].legend(fontsize=8)
+    downstream_bound_rows = []
+    for probability in np.linspace(0.0, 1.0, 201):
+        exact_s = 2.0 * float(probability) - 1.0
+        for phase_bits_cfg, magnitude_bits_cfg in robustness_configs:
+            distribution = qae_phase_distribution_from_probability(float(probability), phase_bits_cfg)
+            weighted_deltas = []
+            total_abs = 0.0
+            for index, weight in distribution.items():
+                _, _, decoded_s, _ = phase_index_to_signed_code(
+                    index, phase_bits_cfg, magnitude_bits_cfg
+                )
+                delta = decoded_s - exact_s
+                weighted_deltas.append((weight, delta))
+                total_abs += weight * abs(delta)
+            for gamma in (0.1, 0.5, 0.73, 1.0, 1.5):
+                downstream_norm = sum(
+                    weight * 2.0 * abs(np.sin(0.5 * float(gamma) * delta))
+                    for weight, delta in weighted_deltas
+                )
+                lipschitz_bound = abs(float(gamma)) * total_abs
+                downstream_bound_rows.append({
+                    "phase_bits": phase_bits_cfg,
+                    "magnitude_bits": magnitude_bits_cfg,
+                    "gamma": gamma,
+                    "probability": float(probability),
+                    "expected_total_signed_abs_error": float(total_abs),
+                    "expected_downstream_operator_norm_error": float(downstream_norm),
+                    "downstream_lipschitz_bound": float(lipschitz_bound),
+                    "bound_slack": float(lipschitz_bound - downstream_norm),
+                })
+    with (TAB / "downstream_bound_grid.csv").open("w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=list(downstream_bound_rows[0].keys()))
+        writer.writeheader()
+        writer.writerows(downstream_bound_rows)
+    del downstream_bound_rows
+    gc.collect()
 
-    positions = np.arange(len(robustness_configs))
-    labels_cfg = [f"({a},{b})" for a, b in robustness_configs]
-    grid_summary = [r for r in summary_rows if r["source"] == "analytic_grid"]
-    qru_summary = [r for r in summary_rows if r["source"] == "qru"]
-    width = 0.36
-    axes2[1, 0].bar(positions - width / 2, [r["mean_total_signed_abs_error"] for r in grid_summary], width, label="uniform p grid")
-    axes2[1, 0].bar(positions + width / 2, [r["mean_total_signed_abs_error"] for r in qru_summary], width, label="QRU samples")
-    axes2[1, 0].set_xticks(positions, labels_cfg)
-    axes2[1, 0].set_xlabel(r"$(m_\phi,m_s)$")
-    axes2[1, 0].set_ylabel("mean signed absolute error")
-    axes2[1, 0].set_title("Uniform-grid and QRU error")
-    axes2[1, 0].legend(fontsize=8)
-
-    axes2[1, 1].bar(positions - width / 2, [r["fraction_total_error_le_0_02"] for r in grid_summary], width, label="uniform p grid")
-    axes2[1, 1].bar(positions + width / 2, [r["fraction_total_error_le_0_02"] for r in qru_summary], width, label="QRU samples")
-    axes2[1, 1].set_xticks(positions, labels_cfg)
-    axes2[1, 1].set_ylim(0.0, 1.0)
-    axes2[1, 1].set_xlabel(r"$(m_\phi,m_s)$")
-    axes2[1, 1].set_ylabel(r"fraction with $\epsilon_s\leq0.02$")
-    axes2[1, 1].set_title("Coverage of a 0.02 signed-error target")
-    axes2[1, 1].legend(fontsize=8)
-    fig2.tight_layout()
-    fig2.savefig(FIG / "03_probability_robustness.pdf")
-    fig2.savefig(FIG / "03_probability_robustness.png", dpi=180)
-    plt.close(fig2)
-
-    fig, axes = plt.subplots(3, 2, figsize=(11.4, 11.2))
-    axes = axes.ravel()
-    m = np.array([r["m_bits"] for r in rows])
-    axes[0].semilogy(m, [r["max_abs_error"] for r in rows], marker="o", label="max error")
-    axes[0].semilogy(m, [r["bound_2_minus_m"] for r in rows], linestyle="--", label=r"$2^{-m}$ bound")
-    axes[0].set_xlabel("magnitude bits $m$")
-    axes[0].set_ylabel("absolute error")
-    axes[0].set_title("Signed fixed-point quantization")
-    axes[0].legend(fontsize=8)
-
-    axes[1].semilogy(
-        [r["sample"] for r in validation_rows],
-        [max(r["observable_operator_error"], np.finfo(float).eps) for r in validation_rows],
-        label=r"$\|B_v^\dagger ZB_v-v\cdot\sigma\|_2$",
-    )
-    axes[1].semilogy(
-        [r["sample"] for r in validation_rows],
-        [max(r["probability_error"], np.finfo(float).eps) for r in validation_rows],
-        label="probability mismatch",
-    )
-    axes[1].set_xlabel("random validation case")
-    axes[1].set_ylabel("numerical residual")
-    axes[1].set_title("Directional basis rotation")
-    axes[1].legend(fontsize=8)
+    # Reload plotting inputs from disk.  This keeps figure generation tied to
+    # persisted paper tables and avoids backend stalls from large live objects.
+    with (TAB / "03_probability_robustness.csv").open(encoding="utf-8") as f:
+        robustness_rows = list(csv.DictReader(f))
+    for row in robustness_rows:
+        for key in (
+            "phase_bits",
+            "magnitude_bits",
+            "exact_probability",
+            "expected_total_signed_abs_error",
+            "expected_downstream_state_infidelity",
+        ):
+            if row[key] != "":
+                row[key] = float(row[key])
+    with (TAB / "03_probability_robustness_summary.csv").open(encoding="utf-8") as f:
+        summary_rows = list(csv.DictReader(f))
+    for row in summary_rows:
+        for key in (
+            "phase_bits",
+            "magnitude_bits",
+            "mean_total_signed_abs_error",
+            "fraction_total_error_le_0_02",
+        ):
+            row[key] = float(row[key])
+    gc.collect()
 
     phase_bit_values = np.array(sorted(qae_summaries))
-    axes[2].semilogy(
-        phase_bit_values,
-        [qae_summaries[m]["absolute_mean_error"] for m in phase_bit_values],
-        marker="o",
-    )
-    axes[2].set_xlabel("QAE phase bits")
-    axes[2].set_ylabel(r"$|\mathbb{E}[\hat p]-p|$")
-    axes[2].set_title(
-        rf"Coherent QAE precision, exact $p={qae_summaries[2]['exact_probability']:.3f}$"
-    )
-
-    for phase_bits, marker in ((2, "o"), (4, "s")):
-        summary = qae_summaries[phase_bits]
-        aggregated = {}
-        for index, weight in summary["distribution"].items():
-            estimate = round(summary["amplitude_estimates"][index], 14)
-            aggregated[estimate] = aggregated.get(estimate, 0.0) + weight
-        estimates = sorted(aggregated)
-        axes[3].plot(
-            estimates,
-            [aggregated[value] for value in estimates],
-            marker=marker,
-            label=f"phase bits={phase_bits}",
-        )
-    axes[3].axvline(
-        qae_summaries[2]["exact_probability"],
-        linestyle="--",
-        label="exact probability",
-    )
-    axes[3].set_xlabel(r"decoded amplitude $\hat p$")
-    axes[3].set_ylabel("probability mass")
-    axes[3].set_title("Decoded coherent QAE distribution")
-    axes[3].legend(fontsize=8)
-
-    labels = [f"({r['phase_bits']},{r['magnitude_bits']})" for r in tradeoff_rows]
-    x_positions = np.arange(len(tradeoff_rows))
-    axes[4].plot(
-        x_positions,
-        [r["compiled_cx_count"] for r in tradeoff_rows],
-        marker="o",
-        label="CX count",
-    )
-    axes[4].plot(
-        x_positions,
-        [r["compiled_depth"] for r in tradeoff_rows],
-        marker="s",
-        label="compiled depth",
-    )
-    axes[4].set_xticks(x_positions, labels)
-    axes[4].set_xlabel(r"$(m_\phi,m_s)$")
-    axes[4].set_ylabel("compiled resources")
-    axes[4].set_yscale("log")
-    axes[4].set_title("Truth-table decoder resource growth")
-    axes[4].legend(fontsize=8)
-
-    axes[5].semilogy(
-        x_positions,
-        [r["expected_qae_signed_abs_error"] for r in tradeoff_rows],
-        marker="o",
-        label="QAE contribution",
-    )
-    axes[5].semilogy(
-        x_positions,
-        [r["expected_decoder_abs_error"] for r in tradeoff_rows],
-        marker="s",
-        label="decoder contribution",
-    )
-    axes[5].semilogy(
-        x_positions,
-        [r["expected_total_signed_abs_error"] for r in tradeoff_rows],
-        marker="^",
-        label="total signed error",
-    )
-    axes[5].set_xticks(x_positions, labels)
-    axes[5].set_xlabel(r"$(m_\phi,m_s)$")
-    axes[5].set_ylabel("expected absolute error")
-    axes[5].set_title("Error decomposition")
-    axes[5].legend(fontsize=7)
-
-    fig.tight_layout()
-    fig.savefig(FIG / "03_registerization_precision.pdf")
-    fig.savefig(FIG / "03_registerization_precision.png", dpi=180)
-    plt.close(fig)
-
     print("Coherent QAE precision validation:")
     for phase_bits in phase_bit_values:
         summary = qae_summaries[int(phase_bits)]
@@ -527,7 +471,12 @@ if __name__ == "__main__":
     parser.add_argument(
         "--full-resources",
         action="store_true",
-        help="recompute expensive transpilation and statevector validations for all precision pairs",
+        help="retained for compatibility; paper runs now regenerate full resources by default",
     )
     args = parser.parse_args()
     main(full_resources=args.full_resources)
+    import os
+    import sys
+    sys.stdout.flush()
+    sys.stderr.flush()
+    os._exit(0)

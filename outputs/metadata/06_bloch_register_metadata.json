@@ -1,0 +1,118 @@
+{
+  "purpose": "Deterministic QRU diagnostic for geometry-aware readout and signed registerization.",
+  "selection_rule": "Search random QRU seeds and choose an identifiable state-motion axis with a non-trivial Bloch trajectory, high selected-coordinate visibility, material angle from Z, and bounded finite-register diagnostics.",
+  "depth": 8,
+  "seed": 22,
+  "m_bits_for_main_figure": 3,
+  "gamma_for_bound": 0.73,
+  "axis_v_star": [
+    -0.5938541499641684,
+    0.6572574945277047,
+    -0.4640580076429016
+  ],
+  "params": [
+    [
+      -1.2578565822336387,
+      -1.0836085410859824,
+      -1.1720421054506807,
+      -0.5604168303394996
+    ],
+    [
+      1.302552103854275,
+      -1.4411825024539024,
+      0.8495725178402204,
+      1.136224724144366
+    ],
+    [
+      -0.3199145631399464,
+      -0.6308424780082266,
+      0.42490315862171774,
+      1.0931018986839682
+    ],
+    [
+      1.9399781505611633,
+      0.8026303434890846,
+      1.4344583991707238,
+      -0.40526241030468296
+    ],
+    [
+      -0.7867952853489218,
+      -1.547795928524444,
+      -1.038332328071395,
+      -0.3270903448644434
+    ],
+    [
+      0.17369524987573923,
+      -1.1817905185102906,
+      0.7344772775377301,
+      -0.09274404560918385
+    ],
+    [
+      -0.5779809676171549,
+      -0.6887598674253275,
+      1.8186194455947073,
+      0.15230551435894996
+    ],
+    [
+      -0.8081338853366204,
+      -0.858584069136556,
+      1.6540419874200663,
+      -0.52051580688897
+    ]
+  ],
+  "adapted_plane_basis": {
+    "v_star": [
+      -0.5938541499641684,
+      0.6572574945277047,
+      -0.4640580076429016
+    ],
+    "u1": [
+      -0.31111004346289595,
+      0.34432597246506746,
+      0.885804812327468
+    ],
+    "u2": [
+      0.7419890763527791,
+      0.6704119707859862,
+      0.0
+    ]
+  },
+  "coordinate_projection_panel": {
+    "indices": [
+      1,
+      2
+    ],
+    "labels": [
+      "y",
+      "z"
+    ]
+  },
+  "summary": {
+    "selected_depth": 8,
+    "selected_seed": 22,
+    "selection_score": 1.8934784495992683,
+    "v_star_x": -0.5938541499641684,
+    "v_star_y": 0.6572574945277047,
+    "v_star_z": -0.4640580076429016,
+    "lambda_1": 6.75790326671714,
+    "lambda_2": 4.0849382307299855,
+    "lambda_3": 1.6730022430229938,
+    "eigengap_gamma": 0.395531710131334,
+    "identifiable": true,
+    "energy_vstar": 6.757903266717141,
+    "energy_z": 2.874982302322759,
+    "energy_gain_vstar_over_z": 2.350589518848494,
+    "visible_gain_vstar_over_z": 1.9191330489923932,
+    "range_vstar": 1.9973444090536594,
+    "range_z": 1.9920002174693519,
+    "range_u1": 1.9625081155938255,
+    "range_u2": 1.9806566553246028,
+    "transverse_spread": 1.9715615030425644,
+    "angle_to_z_degrees": 62.35072505616537,
+    "max_probability_identity_error": 2.498001805406602e-16,
+    "mean_abs_register_error_m3": 0.05878985942542926,
+    "max_abs_register_error_m3": 0.12483475466881255,
+    "mean_downstream_bound_gamma_0p73": 0.04291659738056336,
+    "max_downstream_bound_gamma_0p73": 0.09112937090823316
+  }
+}

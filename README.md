@@ -1,11 +1,18 @@
 # QRU geometry-aware coherent registerization
 
-Code accompanying the paper **Geometry-Aware Coherent Registerization of Single-Qubit Data Re-Uploading Models**.
+Paper-focused repo for **Geometry-Aware Coherent Registerization of Single-Qubit Data Re-Uploading Models**.
 
-The repository implements two components:
+Claim scope: gauge-aware signed Bloch readout + finite coherent signed-register interface + verified small coherent demonstrator. No quantum advantage, no quaternion-performance advantage, no scalable QAE-decoder claim.
 
-1. gauge-aware selection of a signed QRU readout;
-2. coherent conversion of that readout into a finite register controlling a downstream quantum operation.
+## Structure
+
+```text
+paper/                         LaTeX source and curated paper figures
+src/qru_registerization/        geometry, QRU and registerization code
+experiments/                    scripts regenerating paper figures/tables
+outputs/                        generated figures, tables and manifest
+tests/                          regression tests
+```
 
 ## Install
 
@@ -14,36 +21,29 @@ python -m pip install -e .
 python -m pip install -r requirements.txt
 ```
 
-## Validate
+## Reproduce
 
 ```bash
 python -m pytest -q
-```
-
-## Reproduce all experiments
-
-```bash
 python experiments/run_all.py
+latexmk -pdf -cd paper/main.tex
 ```
 
-The aggregate runner may take several minutes because it launches Qiskit statevector and transpilation checks. To recompute the full expensive resource sweep instead of using the validated reference counts, run:
+If external pytest plugins hang in a managed environment:
 
 ```bash
-python experiments/03_coherent_registerization.py --full-resources
+PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest -q
 ```
 
-Generated results are written to `outputs/figures/` and `outputs/tables/`.
-
-## Experiments
+## Active experiments
 
 ```text
-01_gauge_validation.py          gauge-only motion and quotient correction
-02_readout_selection.py         controlled projection blindness and axis selection
-03_coherent_registerization.py  QAE, reversible signed decoding, error and robustness
-04_coherent_composition.py      register-controlled evolution and coherence test
-05_readout_generalization.py    train/test multi-seed readout comparison
+01_gauge_validation.py          gauge-only SU(2) motion and quotient correction
+02_readout_selection.py         projection blindness and tangent-axis selection
+03_coherent_registerization.py  coherent QAE, reversible decoder, error/resources
+04_coherent_composition.py      register-controlled evolution and coherence echo
+05_readout_generalization.py    train/test random-QRU readout comparison
+06_bloch_register_diagnostic.py geometry-to-register diagnostic instance
 ```
 
-## Paper figures
-
-The four PDFs in `figures/` are the curated figures referenced by `main.tex`. They are regenerated from the experiment outputs; no notebook is required.
+`03_coherent_registerization.py` writes regenerated full-resource values, block-level resource tables, and downstream-bound grids. `_plot_03_outputs.py` renders the two 03 figures from the persisted CSV tables.

@@ -2,6 +2,9 @@ from __future__ import annotations
 
 import csv
 
+import matplotlib
+matplotlib.use("Agg")
+
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -106,11 +109,15 @@ def main(n_x: int = 161, c: float = 0.35) -> None:
     axes[1].set_title("Fixed and geometry-selected signed readouts")
     axes[1].legend(fontsize=8)
 
-    fig.tight_layout()
+    fig.subplots_adjust(hspace=0.35, wspace=0.28)
     fig.savefig(FIG / "02_projection_blindness.pdf")
-    fig.savefig(FIG / "02_projection_blindness.png", dpi=180)
     plt.close(fig)
 
 
 if __name__ == "__main__":
     main()
+    import os
+    import sys
+    sys.stdout.flush()
+    sys.stderr.flush()
+    os._exit(0)

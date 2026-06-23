@@ -1,0 +1,74 @@
+{
+  "timestamp_utc": "2026-06-23T10:28:29.923952+00:00",
+  "python": "3.13.5",
+  "platform": "Linux-4.4.0-x86_64-with-glibc2.41",
+  "git_hash": null,
+  "dependencies": {
+    "numpy": "2.3.5",
+    "matplotlib": "3.10.8",
+    "qiskit": "1.4.6",
+    "pytest": "9.0.2"
+  },
+  "qiskit_available": true,
+  "transpile_config": {
+    "basis_gates": [
+      "rz",
+      "sx",
+      "x",
+      "cx"
+    ],
+    "optimization_level": 0,
+    "seed_transpiler": 17
+  },
+  "scripts": [
+    {
+      "script": "05_readout_generalization.py",
+      "status": "passed",
+      "args": []
+    },
+    {
+      "script": "01_gauge_validation.py",
+      "status": "passed",
+      "args": []
+    },
+    {
+      "script": "02_readout_selection.py",
+      "status": "passed",
+      "args": []
+    },
+    {
+      "script": "06_bloch_register_diagnostic.py",
+      "status": "passed",
+      "args": []
+    },
+    {
+      "script": "03_coherent_registerization.py",
+      "status": "passed",
+      "args": []
+    },
+    {
+      "script": "_plot_03_outputs.py",
+      "status": "passed",
+      "args": []
+    },
+    {
+      "script": "04_coherent_composition.py",
+      "status": "passed",
+      "args": []
+    }
+  ],
+  "expected_outputs": {
+    "outputs/figures/01_gauge_only_motion.pdf": true,
+    "outputs/figures/02_projection_blindness.pdf": true,
+    "outputs/figures/03_probability_robustness.pdf": true,
+    "outputs/figures/03_registerization_precision.pdf": true,
+    "outputs/figures/04_register_controlled_z_validation.pdf": true,
+    "outputs/figures/05_multiseed_energy_gain.pdf": true,
+    "outputs/figures/06_bloch_register_diagnostic.pdf": true,
+    "outputs/tables/03_precision_resource_tradeoff.csv": true,
+    "outputs/tables/coherent_resource_breakdown.csv": true,
+    "outputs/tables/coherent_resource_breakdown.tex": true,
+    "outputs/tables/downstream_bound_grid.csv": true,
+    "outputs/tables/04_two_branch_coherence_summary.csv": true
+  }
+}

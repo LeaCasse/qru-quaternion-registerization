@@ -1,6 +1,9 @@
 from __future__ import annotations
 
 import csv
+
+import matplotlib
+matplotlib.use("Agg")
 import itertools
 
 import matplotlib.pyplot as plt
@@ -8,6 +11,7 @@ import numpy as np
 from qiskit import QuantumCircuit, transpile
 
 from _common import FIG, TAB
+from qru_registerization.transpile_config import PAPER_TRANSPILE_KWARGS
 from qru_registerization.coherent_register import (
     build_register_controlled_z_circuit,
     build_two_branch_pipeline_segments,
@@ -35,9 +39,7 @@ def _register_validation() -> tuple[list[dict[str, float | int]], list[dict[str,
                     circuit = build_register_controlled_z_circuit(sign_bit, bits, gamma)
                     compiled = transpile(
                         circuit,
-                        basis_gates=["rz", "sx", "x", "cx"],
-                        optimization_level=0,
-                        seed_transpiler=17,
+                        **PAPER_TRANSPILE_KWARGS,
                     )
                     fidelity = register_controlled_z_fidelity(sign_bit, bits, gamma)
                     rows.append(
@@ -100,9 +102,7 @@ def _coherent_demo() -> tuple[dict[str, object], QuantumCircuit]:
     full_echo = preparation.compose(echo_tail)
     compiled = transpile(
         full_echo,
-        basis_gates=["rz", "sx", "x", "cx"],
-        optimization_level=0,
-        seed_transpiler=17,
+        **PAPER_TRANSPILE_KWARGS,
     )
     metrics = {
         **metrics,
@@ -201,9 +201,8 @@ def main() -> None:
     axes[2].set_ylabel(r"Echo probability $P(0)$")
     axes[2].set_title("Interference echo")
 
-    fig.tight_layout()
+    fig.subplots_adjust(hspace=0.35, wspace=0.28)
     fig.savefig(FIG / "04_register_controlled_z_validation.pdf")
-    fig.savefig(FIG / "04_register_controlled_z_validation.png", dpi=180)
     plt.close(fig)
 
     print("Register-controlled Z validation:")
@@ -215,3 +214,8 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+    import os
+    import sys
+    sys.stdout.flush()
+    sys.stderr.flush()
+    os._exit(0)

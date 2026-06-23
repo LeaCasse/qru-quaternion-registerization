@@ -30,14 +30,27 @@ def _validated_grid(n: int, xs: np.ndarray | None) -> tuple[np.ndarray, np.ndarr
     return x, dx
 
 
-def _canonical_axis(v: np.ndarray) -> np.ndarray:
+def canonical_orient_axis(v: np.ndarray) -> np.ndarray:
+    """Normalize and orient a signed-readout axis canonically.
+
+    Principal eigenvectors are only defined up to sign.  This convention is
+    part of the signed-register interface: the component with largest absolute
+    value is forced to be non-negative, so ``v`` and ``-v`` induce the same
+    oriented readout axis before registerization.
+    """
     v = np.asarray(v, dtype=float).reshape(3)
+    if not np.all(np.isfinite(v)):
+        raise ValueError("axis must be finite")
     norm = np.linalg.norm(v)
     if norm == 0:
         raise ValueError("axis must be non-zero")
     v = v / norm
     idx = int(np.argmax(np.abs(v)))
     return -v if v[idx] < 0 else v
+
+
+def _canonical_axis(v: np.ndarray) -> np.ndarray:
+    return canonical_orient_axis(v)
 
 
 def principal_axis_result(

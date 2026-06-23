@@ -7,7 +7,7 @@ name = "qru-quaternion-registerization"
 version = "0.1.0"
 description = "Geometry-aware coherent registerization tools for single-qubit QRUs"
 requires-python = ">=3.10"
-dependencies = ["numpy>=1.24", "matplotlib>=3.7", "qiskit>=1.2,<2.0"]
+dependencies = ["numpy>=1.24", "matplotlib>=3.7", "qiskit==1.4.6"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
@@ -15,4 +15,4 @@ where = ["src"]
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 testpaths = ["tests"]
-addopts = "-q"
+addopts = "-q -p no:ddtrace -p no:asyncio -p no:anyio -p no:cov -p no:json-report -p no:metadata"

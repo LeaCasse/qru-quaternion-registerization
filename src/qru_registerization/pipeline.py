@@ -7,6 +7,7 @@ from .quaternion_geometry import su2_to_quaternion, bloch_from_quaternion
 from .bloch import bloch_vector, signed_coordinate
 from .amplitude_interface import projector_probability, probability_from_signed_coordinate, signed_coordinate_from_probability
 from .fixed_point import quantize_signed_fixed_point
+from .quaternion_diagnostics import canonical_orient_axis
 
 
 def compute_paths(params: np.ndarray, xs: np.ndarray) -> dict[str, np.ndarray]:
@@ -31,9 +32,10 @@ def compute_paths(params: np.ndarray, xs: np.ndarray) -> dict[str, np.ndarray]:
 
 
 def registerize_path(states: np.ndarray, bloch_path: np.ndarray, v: np.ndarray, m: int) -> dict[str, np.ndarray]:
-    s = np.array([signed_coordinate(r, v) for r in bloch_path], dtype=float)
+    axis = canonical_orient_axis(v)
+    s = np.array([signed_coordinate(r, axis) for r in bloch_path], dtype=float)
     p_from_s = np.array([probability_from_signed_coordinate(si) for si in s], dtype=float)
-    p_direct = np.array([projector_probability(psi, v) for psi in states], dtype=float)
+    p_direct = np.array([projector_probability(psi, axis) for psi in states], dtype=float)
     s_from_p = np.array([signed_coordinate_from_probability(pi) for pi in p_direct], dtype=float)
     s_quant = np.array([quantize_signed_fixed_point(si, m) for si in s_from_p], dtype=float)
-    return {"s": s, "p_from_s": p_from_s, "p_direct": p_direct, "s_from_p": s_from_p, "s_quant": s_quant}
+    return {"axis": axis, "s": s, "p_from_s": p_from_s, "p_direct": p_direct, "s_from_p": s_from_p, "s_quant": s_quant}

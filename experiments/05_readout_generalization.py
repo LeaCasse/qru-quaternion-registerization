@@ -1,6 +1,9 @@
 from __future__ import annotations
 
 import csv
+
+import matplotlib
+matplotlib.use("Agg")
 from collections import defaultdict
 
 import matplotlib.pyplot as plt
@@ -171,9 +174,8 @@ def main(depths=(2, 3, 5, 8), seeds=range(60), n_x: int = 181) -> None:
     axes_plot[1].boxplot(angle_data, tick_labels=[str(d) for d in depths], showfliers=False)
     axes_plot[1].set_xlabel("QRU depth")
     axes_plot[1].set_ylabel("Axis angle (degrees)")
-    fig.tight_layout()
+    fig.subplots_adjust(hspace=0.35, wspace=0.28)
     fig.savefig(FIG / "05_multiseed_energy_gain.pdf")
-    fig.savefig(FIG / "05_multiseed_energy_gain.png", dpi=180)
     plt.close(fig)
 
     print("Paired out-of-sample quotient-vs-PCA summary")
@@ -183,3 +185,8 @@ def main(depths=(2, 3, 5, 8), seeds=range(60), n_x: int = 181) -> None:
 
 if __name__ == "__main__":
     main()
+    import os
+    import sys
+    sys.stdout.flush()
+    sys.stderr.flush()
+    os._exit(0)

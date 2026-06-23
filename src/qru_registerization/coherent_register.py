@@ -684,6 +684,37 @@ def build_qae_signed_downstream_circuit(
     return circuit
 
 
+
+
+def build_phase_to_signed_decoder_circuit(
+    phase_bits: int,
+    magnitude_bits: int,
+) -> QuantumCircuit:
+    """Build the reversible finite lookup ``|y>|0> -> |y>|s_y>``."""
+    if phase_bits <= 0 or magnitude_bits <= 0:
+        raise ValueError("phase_bits and magnitude_bits must be positive")
+    phase_qubits = tuple(range(phase_bits))
+    sign_qubit = phase_bits
+    magnitude_qubits = tuple(range(phase_bits + 1, phase_bits + 1 + magnitude_bits))
+    circuit = QuantumCircuit(phase_bits + 1 + magnitude_bits, name="phase_to_signed_decoder")
+    apply_phase_to_signed_lookup(circuit, phase_qubits, sign_qubit, magnitude_qubits)
+    return circuit
+
+
+def build_signed_downstream_block_circuit(
+    magnitude_bits: int,
+    gamma: float,
+) -> QuantumCircuit:
+    """Build only the signed-register controlled ``exp(-i gamma s Z)`` block."""
+    if magnitude_bits <= 0:
+        raise ValueError("magnitude_bits must be positive")
+    sign_qubit = 0
+    magnitude_qubits = tuple(range(1, 1 + magnitude_bits))
+    target_qubit = 1 + magnitude_bits
+    circuit = QuantumCircuit(2 + magnitude_bits, name="signed_downstream_control")
+    apply_register_controlled_z_evolution(circuit, sign_qubit, magnitude_qubits, target_qubit, gamma)
+    return circuit
+
 def build_qae_phase_reference_downstream_circuit(
     amplitude_unitary: np.ndarray,
     phase_bits: int = 4,

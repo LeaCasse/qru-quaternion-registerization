@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import pytest
+pytest.importorskip("qiskit")
+
 import numpy as np
 
 from qru_registerization.gates import random_qru_params

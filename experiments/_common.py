@@ -11,5 +11,6 @@ if str(SRC) not in sys.path:
 FIG = ROOT / "outputs" / "figures"
 TAB = ROOT / "outputs" / "tables"
 DATA = ROOT / "outputs" / "data"
-for p in (FIG, TAB, DATA):
+META = ROOT / "outputs" / "metadata"
+for p in (FIG, TAB, DATA, META):
     p.mkdir(parents=True, exist_ok=True)

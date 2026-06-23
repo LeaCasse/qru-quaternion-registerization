@@ -4,6 +4,7 @@ import itertools
 
 import numpy as np
 import pytest
+pytest.importorskip("qiskit")
 from qiskit import QuantumCircuit
 
 from qru_registerization.coherent_register import (
