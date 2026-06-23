@@ -177,11 +177,11 @@ The second analytic control uses $U(x)=R_z(x)R_y(\theta)$ on a restricted arc. I
 \begin{figure}[t]
 \centering
 \begin{minipage}{0.48\columnwidth}
-\includegraphics[width=\linewidth]{figures/gauge_only_motion.pdf}
+\includegraphics[width=\linewidth]{figures/gauge_only_motion.png}
 \centering\small (a)
 \end{minipage}\hfill
 \begin{minipage}{0.48\columnwidth}
-\includegraphics[width=\linewidth]{figures/projection_blindness.pdf}
+\includegraphics[width=\linewidth]{figures/projection_blindness.png}
 \centering\small (b)
 \end{minipage}
 \caption{Geometric controls. (a) Gauge-only $SU(2)$ motion produces raw rotation length while all Bloch coordinates remain constant. (b) A constant $Z$ readout hides observable motion in the $XY$ plane.}
@@ -190,23 +190,24 @@ The second analytic control uses $U(x)=R_z(x)R_y(\theta)$ on a restricted arc. I
 
 For random QRUs, axes are fitted on $[-\pi,0]$ and evaluated on $[0,\pi]$ using one common state-motion energy. Quotient weighting is state-motion weighting by Proposition~\ref{prop:quotient}. Relative to unweighted Bloch PCA, its paired mean test-energy gain has a bootstrap interval excluding zero only at depth two; intervals include zero at depths three, five, and eight (Fig.~\ref{fig:results}(a)). The quotient construction is therefore a gauge-correct derivation of the state geometry, not evidence of a general quaternion-specific performance advantage.
 
-To connect the geometric readout with the finite register interface, we use one reproducible depth-eight QRU diagnostic rather than a hand-picked visualization. The selected axis is accepted only when the tangent covariance is non-degenerate; for this instance,
+The Bloch-register diagnostic in Fig.~\ref{fig:bloch_register_diagnostic} uses one deterministic depth-eight QRU instance selected by the same identifiability test. For this instance,
 \begin{equation}
 \begin{aligned}
 \vstar&=(-0.5939,\,0.6573,\,-0.4641)^T,\\
 \Gamma&=0.3955.
 \end{aligned}
 \end{equation}
-It is therefore not a disguised $Z$ readout. The projector identity is checked numerically through
+and
 \begin{equation}
 \max_x\left|p_{\vstar}(x)-\frac{1+s_{\vstar}(x)}{2}\right|
 =2.5\times10^{-16}.
 \end{equation}
+The figure is therefore a checked interface diagnostic, not a supervised-performance result.
 
 \begin{figure*}[t]
 \centering
-\includegraphics[width=0.92\textwidth]{figures/06_bloch_register_diagnostic.pdf}
-\caption{\textbf{Bloch-register diagnostic.} Representative QRU instance linking the geometry-selected signed coordinate to its finite signed-register approximation. The selected axis gives a $2.35\times$ tangent-energy gain over $e_z$ and, for a three-bit signed register, a mean absolute signed error of $5.88\times10^{-2}$.}
+\includegraphics[width=0.98\textwidth]{figures/06_bloch_register_diagnostic.png}
+\caption{Bloch-register diagnostic. The selected axis has $2.35\times$ the tangent energy of $e_z$; the three-bit signed register has mean absolute error $5.88\times10^{-2}$.}
 \label{fig:bloch_register_diagnostic}
 \end{figure*}
 
@@ -243,11 +244,10 @@ B_{\axis}^{\dagger}ZB_{\axis}=\axis\cdot\pauli.
 \end{equation}
 For $\axis=(\sin\theta\cos\phi,\sin\theta\sin\phi,\cos\theta)$, one valid choice is $B_{\axis}=R_y(-\theta)R_z(-\phi)$. A standard QPE-based QAE writes a coherent phase word $y$. A reversible finite decoder implements
 \begin{equation}
-\ket{y}\ket{0}
-\longmapsto
-\ket{y}\ket{\widehat s_y},
-\qquad
-\widehat s_y=Q_{m_s}\!\left[2\sin^2\!\left(\frac{\pi y}{2^{m_\phi}}\right)-1\right].
+\begin{aligned}
+\ket{y}\ket{0}&\longmapsto\ket{y}\ket{\widehat s_y},\\
+\widehat s_y&=Q_{m_s}\!\left[2\sin^2\!\left(\frac{\pi y}{2^{m_\phi}}\right)-1\right].
+\end{aligned}
 \end{equation}
 The signed register controls
 \begin{equation}
@@ -258,20 +258,35 @@ Because all $Z$ terms commute, each magnitude bit controls one weighted rotation
 
 \subsection{Functional validation, precision, and resources}
 
-All signed words for $m_s=2,3$ reproduce the direct rotation with state infidelity below $4\times10^{-15}$. A seven-qubit two-input construction maintains a superposition of QRU branches, writes two signed values coherently, applies the downstream evolution, and reverses the pipeline. Its interference echo gives $P(0)>1-10^{-14}$; interface dephasing gives $P(0)=1/2$.
+All signed words for $m_s=2,3$ reproduce the direct rotation with state infidelity below $4\times10^{-15}$. A seven-qubit two-input construction maintains a superposition of QRU branches, writes two signed values coherently, applies the downstream evolution, and reverses the pipeline. Its interference echo gives $P(0)=1$ to numerical precision, while interface dephasing gives $P(0)=1/2$.
 
-The complete QAE--decoder--downstream circuit is validated against a direct phase-word-controlled reference. For $(m_\phi,m_s)=(4,3)$, it uses ten qubits and attains fidelity above $1-1.4\times10^{-13}$ with signed-register reset probability above $1-1.3\times10^{-13}$. Naive decomposition gives depth 6156 and 2170 CX gates, dominated by the finite truth-table decoder.
+The complete QAE--decoder--downstream circuit is validated against a direct phase-word-controlled reference. For $(m_\phi,m_s)=(4,3)$, it uses ten qubits and attains fidelity above $1-1.4\times10^{-13}$ with signed-register reset probability above $1-1.3\times10^{-13}$. The resources in Table~\ref{tab:resources} are regenerated from the circuit. The finite lookup, together with its uncomputation, is the dominant cost.
 
-The favourable point $p=0.3059$ is not representative. Over 201 uniformly spaced probabilities, mean signed errors for $(3,2),(4,3),(5,4)$ are $0.244$, $0.139$, and $0.0829$; only $1.5\%$, $4.5\%$, and $11.4\%$ of values achieve error at most $0.02$. Across 1488 random-QRU readouts, the corresponding means are $0.242$, $0.139$, and $0.0816$. The oscillatory phase-grid error and its downstream effect are shown in Fig.~\ref{fig:results}(b).
+\begin{table*}[t]
+\centering
+\caption{Coherent-interface precision and resources. Transpilation uses basis gates $\{\mathrm{rz},\mathrm{sx},\mathrm{x},\mathrm{cx}\}$, optimization level one, and seed 42. Decoder CX counts one phase-to-signed lookup; the inverse lookup has comparable cost.}
+\label{tab:resources}
+\begin{tabular}{ccccccc}
+\toprule
+$(m_\phi,m_s)$ & qubits & depth & CX & decoder CX & grid mean $|\widehat s-s|$ & QRU mean $|\widehat s-s|$ \\
+\midrule
+$(3,2)$ & 8  & 795   & 326  & 150  & 0.244 & 0.242 \\
+$(4,3)$ & 10 & 6156  & 2170 & 1050 & 0.139 & 0.139 \\
+$(5,4)$ & 12 & 19443 & 6513 & 3210 & 0.0829 & 0.0816 \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+The favourable point $p=0.3059$ is not representative. Over the uniform probability grid, only $1.5\%$, $4.5\%$, and $11.4\%$ of values achieve signed error at most $0.02$ for $(3,2),(4,3),(5,4)$. The oscillatory phase-grid error and its downstream effect are shown in Fig.~\ref{fig:results}(b).
 
 \begin{figure}[t]
 \centering
 \begin{minipage}{0.48\columnwidth}
-\includegraphics[width=\linewidth]{figures/readout_generalization.pdf}
+\includegraphics[width=\linewidth]{figures/readout_generalization.png}
 \centering\small (a)
 \end{minipage}\hfill
 \begin{minipage}{0.48\columnwidth}
-\includegraphics[width=\linewidth]{figures/coherent_precision_robustness.pdf}
+\includegraphics[width=\linewidth]{figures/coherent_precision_robustness.png}
 \centering\small (b)
 \end{minipage}
 \caption{Main numerical results. (a) Out-of-sample quotient/state weighting versus unweighted Bloch PCA. (b) Finite-precision QAE and signed-decoder error over the probability domain and QRU samples.}
@@ -282,7 +297,7 @@ The favourable point $p=0.3059$ is not representative. Over 201 uniformly spaced
 
 The two contributions solve distinct parts of one composability problem. Geometry determines which scalar coordinate is exposed; coherent registerization transports that coordinate without an intermediate classical interface. The geometric study also limits its own claim: quotient quaternion motion equals Bloch-geodesic state motion, and current random-QRU experiments do not establish systematic improvement over Bloch PCA. The remaining value of the quaternion formulation is the explicit diagnosis and removal of gauge-only motion.
 
-The coherent circuit establishes functional composability, not near-term practicality. A measurement-reinjection pipeline may be preferable for one known classical input. Coherent transport becomes structurally relevant when inputs, scenarios, or downstream branches remain in superposition. Even then, standard low-precision QAE has strongly input-dependent errors, while the exact finite decoder scales exponentially in $m_\phi$. A scalable implementation requires structured reversible approximation of the sine-square map or an estimator producing a more directly consumable numerical representation. The present results therefore support an interface theorem and a verified small demonstrator, not a scalable NISQ architecture.
+The coherent circuit establishes functional composability, not near-term practicality. A measurement-reinjection pipeline may be preferable for one known classical input. Coherent transport becomes structurally relevant when inputs, scenarios, or downstream branches remain in superposition, as in the two-branch interference test. Even then, standard low-precision QAE has strongly input-dependent errors, while the exact finite decoder scales as a lookup over $2^{m_\phi}$ phase words. A scalable implementation requires a structured reversible approximation of the sine-square map or an estimator producing a more directly consumable numerical representation. The present results therefore support an interface theorem and a verified small demonstrator, not a scalable NISQ architecture.
 
 \section{Conclusion}
 
